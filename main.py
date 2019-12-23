@@ -1,11 +1,12 @@
 import random
 import math
 import weakref
+import time
 
 class Moves():
-    def __init__(self, movename, atk):
+    def __init__(self, movename, pwr=0):
         self.movename = movename
-        self.atk = atk
+        self.pwr = pwr
 
     def getMove(self):
         return self.movename
@@ -21,11 +22,14 @@ class UniquePoke():
 
     pokemonlist = []
 
-    def __init__(self, name, poketype, **move):
+    def __init__(self, name, poketype, bhp, batk, bdef, **move):
         self.__class__.pokemonlist.append(weakref.proxy(self))
         self.name = name
         self.poketype = poketype
         self.xp = 0
+        self.bhp = bhp
+        self.batk = batk
+        self.bdef = bdef
         self.movedict = move
 
     def __str__(self):
@@ -37,7 +41,10 @@ class MyPokemon(UniquePoke):
     def __init__(self, pokeobj, lvl, xp):
         self.pokeobj = pokeobj
         self.lvl = lvl
-        self.hp = self.lvl*2 + 2
+        # Calculate its stat
+        self.shp = math.floor((((self.pokeobj.bhp*2) * self.lvl) / 100) + self.lvl + 10)
+        self.satk = math.floor((((self.pokeobj.batk*2) * self.lvl) / 100) + 5)
+        self.sdef = math.floor((((self.pokeobj.bdef*2) * self.lvl) / 100) + 5)
         self.xp = xp
         self.xplimit = self.lvl * 5
         newmovedict = dict((int(key[3:]), value) for (key, value) in self.pokeobj.movedict.items())
@@ -55,29 +62,33 @@ class MyPokemon(UniquePoke):
     def getMoves(self):
         return f"Moves available:\n 1.{self.move1}\n 2.{self.move2}\n 3.{self.move3}\n 4.{self.move4}"
 
-    def doMove(self, movenum):
-        self.movenum = movenum
-        if self.movenum == '1':
+    def doMove(self, foeobj, movenum):
+        movenum
+        if movenum == '1':
             print(f"Your {self.pokeobj.name} used {self.move1} on the foe's pokemon!")
-            return self.move1.atk
-        elif self.movenum == '2':
+            mydmg = math.floor(((((2*self.lvl)/5 + 2) * self.move1.pwr * self.satk/foeobj.sdef) / 50) + 2)
+            return mydmg
+        elif movenum == '2':
             print(f"Your {self.pokeobj.name} used {self.move2} on the foe's pokemon!")
-            return self.move2.atk
-        elif self.movenum == '3':
+            mydmg = math.floor(((((2*self.lvl)/5 + 2) * self.move2.pwr * self.satk/foeobj.sdef) / 50) + 2)
+            return mydmg
+        elif movenum == '3':
             print(f"Your {self.pokeobj.name} used {self.move3} on the foe's pokemon!")
-            return self.move3.atk
-        elif self.movenum == '4':
+            mydmg = math.floor(((((2*self.lvl)/5 + 2) * self.move3.pwr * self.satk/foeobj.sdef) / 50) + 2)
+            return mydmg
+        elif movenum == '4':
             print(f"Your {self.pokeobj.name} used {self.move4} on the foe's pokemon!")
-            return self.move4.atk
+            mydmg = math.floor(((((2*self.lvl)/5 + 2) * self.move4.pwr * self.satk/foeobj.sdef) / 50) + 2)
+            return mydmg
 
     def hpLoss(self, hitdmg):
-        self.hp -= hitdmg
+        self.shp -= hitdmg
 
     def getHp(self):
-        return self.hp
+        return self.shp
 
     def showHp(self):
-        print(f"*Your {self.pokeobj.name} HP is now {self.hp}.")
+        print(f"*Your {self.pokeobj.name} HP is now {self.shp}.")
 
     def gainXp(self, xpgain):
         self.xp += xpgain
@@ -107,8 +118,11 @@ class WildPokemon(UniquePoke):
     def __init__(self, pokeobj, lvl):
         self.pokeobj = pokeobj
         self.lvl = lvl
-        self.yieldXp = self.lvl * 2
-        self.hp = self.lvl*2 + 2
+        self.yieldXp = (self.lvl * 2) + 2
+        # Calculate its stat
+        self.shp = self.hp = math.floor((((self.pokeobj.bhp*2) * self.lvl) / 100) + self.lvl + 10)
+        self.satk = math.floor((((self.pokeobj.batk*2) * self.lvl) / 100) + 5)
+        self.sdef = math.floor((((self.pokeobj.bdef*2) * self.lvl) / 100) + 5)
         # Assigning moveset
         newmovedict = dict((int(key[3:]), value) for (key, value) in self.pokeobj.movedict.items())
         movelist = []
@@ -122,55 +136,72 @@ class WildPokemon(UniquePoke):
         self.move3 = movelist[2]
         self.move4 = movelist[3]
 
-    def doMove(self):
-        self.movenum = str(random.randint(1, 2))
-        if self.movenum == '1':
+    def getMoves(self):
+        return f"Foe's moves:\n 1.{self.move1}\n 2.{self.move2}\n 3.{self.move3}\n 4.{self.move4}"
+
+    def doMove(self, myobj):
+        movenum = str(random.randint(1, 2))
+        if movenum == '1':
             print(f"Foe's {self.pokeobj.name} used {self.move1} on your pokemon!")
-            return self.move1.atk
-        elif self.movenum == '2':
+            foedmg = math.floor(((((2*self.lvl)/5 + 2) * self.move1.pwr * self.satk/myobj.sdef) / 50) + 2)
+            return foedmg
+        elif movenum == '2':
             print(f"Foe's {self.pokeobj.name} used {self.move2} on your pokemon!")
-            return self.move2.atk
-        elif self.movenum == '3':
+            foedmg = math.floor(((((2*self.lvl)/5 + 2) * self.move2.pwr * self.satk/myobj.sdef) / 50) + 2)
+            return foedmg
+        elif movenum == '3':
             print(f"Foe's {self.pokeobj.name} used {self.move3} on your pokemon!")
-            return self.move3.atk
-        elif self.movenum == '4':
+            foedmg = math.floor(((((2*self.lvl)/5 + 2) * self.move3.pwr * self.satk/myobj.sdef) / 50) + 2)
+            return foedmg
+        elif movenum == '4':
             print(f"Foe's {self.pokeobj.name} used {self.move4} on your pokemon!")
-            return self.move4.atk
+            foedmg = math.floor(((((2*self.lvl)/5 + 2) * self.move4.pwr * self.satk/myobj.sdef) / 50) + 2)
+            return foedmg
+        else:
+            pass
 
     def hpLoss(self, hitdmg):
-        self.hp -= hitdmg
+        self.shp -= hitdmg
 
     def getHp(self):
-        return self.hp
+        return self.shp
 
     def showHp(self):
-        print(f"*Foe's {self.pokeobj.name} HP is now {self.hp}.")
+        print(f"*Foe's {self.pokeobj.name} HP is now {self.shp}.")
         
     def __str__(self):
         return f"A wild lvl {self.lvl} {self.pokeobj.name} appeared!"
 
 # Moves initiation
-Tackle = Moves("Tackle", 2)
-Scratch = Moves("Scratch", 2)
-Pound = Moves("Pound", 2)
-Ember = Moves("Ember", 3)
-Metal_Claw = Moves("Metal Claw", 3)
-Peck = Moves("Peck", 3)
-Vine_Whip = Moves("Vine Whip", 3)
+Tackle = Moves("Tackle", 40)
+Scratch = Moves("Scratch", 40)
+Pound = Moves("Pound", 40)
+Peck = Moves("Peck", 45)
+Metal_Claw = Moves("Metal Claw", 45)
+Mud_Shot = Moves("Mud Shot", 45)
+Vine_Whip = Moves("Vine Whip", 45)
+Ember = Moves("Ember", 45)
+Bubble = Moves("Bubble", 45)
+Thunder_Shock = Moves("Thunder Shock", 45)
+Slam = Moves("Slam", 50)
 
 # Pokemon available initiation
-Bulbasaur = UniquePoke("Bulbasaur", "Grass", lvl2=Tackle, lvl5=Peck, lvl7=Vine_Whip)
-Charmander = UniquePoke("Charmander", "Fire", lvl2=Scratch, lvl5=Metal_Claw, lvl7=Ember)
+Pikachu = UniquePoke("Pikachu", "Electric", bhp=35, batk=55, bdef=40, lvl2=Scratch, lvl4=Thunder_Shock, lvl7=Slam)
+Treecko = UniquePoke("Treecko", "Grass", bhp=40, batk=45, bdef=35, lvl2=Tackle, lvl4=Peck, lvl7=Vine_Whip)
+Torchic = UniquePoke("Torchic", "Fire", bhp=45, batk=60, bdef=40, lvl2=Scratch, lvl4=Metal_Claw, lvl7=Ember)
+Mudkip = UniquePoke("Mudkip", "Water", bhp=50, batk=70, bdef=50, lvl2=Pound, lvl4=Mud_Shot, lvl7=Bubble)
+
 
 def main():
 
     # Greetings
-    print("-Welcome to The Pokemon World!-")
-    print("-------------------------------")
+    print("\nWelcome to The Pokemon World!")
+    print("-----------------------------")
+    time.sleep(0.5)
 
     # Pokemon initiation
-    my_pokemon = MyPokemon(Bulbasaur, lvl=5, xp=0)
-    wild_pokemon = WildPokemon(random.choice(UniquePoke.pokemonlist), lvl=6)
+    my_pokemon = MyPokemon(Pikachu, lvl=5, xp=0)
+    wild_pokemon = WildPokemon(random.choice(UniquePoke.pokemonlist), lvl=4)
 
     # Battle scene
     exit = False
@@ -187,15 +218,20 @@ def main():
             print()
             print(my_pokemon.getMoves())
             # Asking for user's intended move
-            print("Which move would you do?")
-            choose_move = input("> ")
+            choose_move = ''
+            while choose_move not in ['1', '2', '3', '4']:
+                print("Which move would you do?")
+                choose_move = input("> ")
+            time.sleep(0.5)
+            print()
             # Damage calculations
-            mydmg = my_pokemon.doMove(choose_move)
+            mydmg = my_pokemon.doMove(wild_pokemon, choose_move)
             wild_pokemon.hpLoss(mydmg)
             # When the foe survives
             if wild_pokemon.getHp() > 0:
                 wild_pokemon.showHp()
-                foedmg = wild_pokemon.doMove()
+                time.sleep(0.5)
+                foedmg = wild_pokemon.doMove(my_pokemon)
                 my_pokemon.hpLoss(foedmg)
                 if my_pokemon.getHp() <= 0:
                     # Exit the battle
@@ -204,6 +240,8 @@ def main():
                     exit = True
                 elif my_pokemon.getHp() > 0:
                     my_pokemon.showHp()
+                    time.sleep(1)
+                    print()
                     print("------------------------------")
 
         # When the foe faints
@@ -223,8 +261,8 @@ def main():
                     valid = True
                 elif stay == 'y':
                     # Initiate current state pokemon and moves
-                    my_pokemon = MyPokemon(Bulbasaur, lvl=lvl_now, xp=xp_now)
-                    wild_pokemon= WildPokemon(Charmander, lvl=6)
+                    my_pokemon = MyPokemon(Pikachu, lvl=lvl_now, xp=xp_now)
+                    wild_pokemon= WildPokemon(random.choice(UniquePoke.pokemonlist), lvl=4)
                     valid = True
                     print()
                     print("------------------------------")
