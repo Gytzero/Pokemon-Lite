@@ -7,6 +7,7 @@ import time
 class Moves():
     def __init__(self, movename, pwr=0):
         self.movename = movename
+        #self.movetype = movetype
         self.pwr = pwr
 
     def getMove(self):
@@ -47,13 +48,14 @@ class MyPokemon(UniquePoke):
         self.satk = math.floor((((self.pokeobj.batk*2) * self.lvl) / 100) + 5)
         self.sdef = math.floor((((self.pokeobj.bdef*2) * self.lvl) / 100) + 5)
         self.xp = xp
-        self.xplimit = self.lvl * 5
+        self.xplimit = self.lvl * 3
         self.movelist = []
         for k,v in self.pokeobj.movedict.items():
-            if k <= self.lvl and len(self.movelist) <= 4:
+            if k <= self.lvl:
                 self.movelist.append(v)
         while len(self.movelist) < 4:
             self.movelist.append("")
+        self.movelist = self.movelist[-4:]
         self.move1 = self.movelist[0]
         self.move2 = self.movelist[1]
         self.move3 = self.movelist[2]
@@ -106,7 +108,33 @@ class MyPokemon(UniquePoke):
             return self.lvl, self.xp
         else:
             return self.lvl, self.xp
-
+        
+    def updateState(self, lvl, xp):
+        self.lvl = lvl
+        self.xp = xp
+        self.shp = math.floor((((self.pokeobj.bhp*2) * self.lvl) / 100) + self.lvl + 10)
+        self.satk = math.floor((((self.pokeobj.batk*2) * self.lvl) / 100) + 5)
+        self.sdef = math.floor((((self.pokeobj.bdef*2) * self.lvl) / 100) + 5)
+        self.xplimit = self.lvl * 3
+        for k,v in self.pokeobj.movedict.items():
+            if k == self.lvl and "" not in self.movelist and v not in self.movelist:
+                print(f"Your pokemon wants to learn {v}, which move would you want to forget?")
+                time.sleep(0.3)
+                self.showMoves()
+                update_move = ""
+                while update_move not in [str(num+1) for num in range(len(self.movelist))]:
+                    update_move = input(">>")
+                forget = self.movelist[int(update_move)-1]
+                self.movelist[int(update_move)-1] = v
+                print(f"Your pokemon forget {forget}, and now learn {v}")
+            elif k == self.lvl and "" in self.movelist and v not in self.movelist:
+                self.movelist[self.movelist.index("")] = v
+                print(f"Your pokemon now learn {v}!")
+        self.move1 = self.movelist[0]
+        self.move2 = self.movelist[1]
+        self.move3 = self.movelist[2]
+        self.move4 = self.movelist[3]
+        
     def __str__(self):
         return f"You have a lvl {self.lvl} {self.pokeobj.name}."
 
@@ -127,10 +155,11 @@ class WildPokemon(UniquePoke):
         # Assigning moveset
         self.movelist = []
         for k,v in self.pokeobj.movedict.items():
-            if k <= self.lvl and len(self.movelist) <= 4:
+            if k <= self.lvl:
                 self.movelist.append(v)
         while len(self.movelist) < 4:
             self.movelist.append("")
+        self.movelist = self.movelist[-4:]
         self.move1 = self.movelist[0]
         self.move2 = self.movelist[1]
         self.move3 = self.movelist[2]
@@ -180,10 +209,14 @@ class WildPokemon(UniquePoke):
         return self.name
 
 class Area():
+
+    arealist = []
+
     def __init__(self, areaname, wildict):
+        self.__class__.arealist.append(weakref.proxy(self))
         self.areaname = areaname
         self.wildict = wildict
-    
+
     def __str__(self):
         return self.areaname
 
@@ -200,32 +233,45 @@ Ember = Moves("Ember", 45)
 Bubble = Moves("Bubble", 45)
 Thunder_Shock = Moves("Thunder Shock", 45)
 Slam = Moves("Slam", 50)
+Shock_Wave = Moves("Shock Wave", 60)
 
 # Pokemon available initiation
-Pikachu = UniquePoke("Pikachu", "Electric", bhp=35, batk=55, bdef=40, movedict={2:Scratch, 4:Thunder_Shock, 7:Slam})
+Pikachu = UniquePoke("Pikachu", "Electric", bhp=35, batk=55, bdef=40, movedict={2:Scratch, 4:Thunder_Shock, 7:Slam, 12:Shock_Wave, 15:Metal_Claw})
 Treecko = UniquePoke("Treecko", "Grass", bhp=40, batk=45, bdef=35, movedict={2:Tackle, 4:Peck, 7:Vine_Whip})
 Torchic = UniquePoke("Torchic", "Fire", bhp=45, batk=60, bdef=40, movedict={2:Scratch, 4:Metal_Claw, 7:Ember})
 Mudkip = UniquePoke("Mudkip", "Water", bhp=50, batk=70, bdef=50, movedict={2:Pound, 4:Mud_Shot, 7:Bubble})
-Rattata = UniquePoke("Rattata", "Normal", bhp=30, batk=30, bdef=30, movedict={2:Tackle, 2:Scratch, 4:Pound})
-Pidgey = UniquePoke("Pidgey", "Flying", bhp=40, batk=40, bdef=40, movedict={2:Scratch, 2:Peck, 4:Slam})
+Poochyena = UniquePoke("Poochyena", "Dark", bhp=38, batk=30, bdef=41, movedict={2:Scratch, 2:Peck, 4:Slam})
+Zigzagoon = UniquePoke("Zigzagoon", "Normal", bhp=35, batk=55, bdef=35, movedict={2:Tackle, 2:Scratch, 4:Pound})
+Wurmple = UniquePoke("Wurmple", "Bug", bhp=45, batk=45, bdef=35, movedict={2:Pound, 2:Tackle, 4:Peck})
 
 # Area initiation
-Route_1 = Area("Route 1", {Rattata:[2,4], Pidgey:[2,4]})
+Route_101 = Area("Route 101", {Poochyena:[2,3], Zigzagoon:[2,3]})
+Route_103 = Area("Route 103", {Poochyena:[2,4], Zigzagoon:[2,4], Wurmple:[2,4]})
+Victory_Road = Area("Victory Road", {Treecko:[12,12], Torchic:[12,12], Mudkip:[12,12]})
+
 
 def main():
-
     # Greetings
     print("\nWelcome to The Pokemon World!")
     print("-----------------------------")
     time.sleep(0.5)
 
-    # Ask for area
-    area = Route_1
-    print(f"You are in {area}\n")
-    print(area.wildict)
+    # Ask for chosen area
+    print("Area available:")
+    for i in range(len(Area.arealist)):
+        print(f" {i+1}.{Area.arealist[i]}")
+    choose_area = ''
+    while choose_area not in [str(num+1) for num in range(len(Area.arealist))]:
+        print("Which area would you go into?")
+        choose_area = input("> ")
+    time.sleep(1)
+    print()
+    area = Area.arealist[int(choose_area)-1]
+    print(f"You are now in {area}\n")
+    time.sleep(0.3)
 
     # Pokemon initiation
-    my_pokemon = MyPokemon(Pikachu, lvl=5, xp=0)
+    my_pokemon = MyPokemon(Pikachu, lvl=6, xp=0)
     random_poke = random.choice(list(area.wildict))
     lvl_min, lvl_max = area.wildict[random_poke]
     wild_pokemon = WildPokemon(random_poke, lvl=random.randint(lvl_min, lvl_max))
@@ -252,7 +298,7 @@ def main():
                     count += 1
             # Limitting undesired input
             while choose_move not in [str(num+1) for num in range(count)]:
-                print("Which move would you do?")
+                print("Which move would you use?")
                 choose_move = input("> ")
             time.sleep(0.5)
             print()
@@ -283,6 +329,9 @@ def main():
             time.sleep(0.5)
             print(my_pokemon.gainXp(wild_pokemon.yieldXp))
             lvl_now, xp_now = my_pokemon.evalStat()
+            time.sleep(0.3)
+            my_pokemon.updateState(lvl_now, xp_now)
+            time.sleep(0.3)
             valid = False
             while not valid:
                 # Asking for user's input to continue
@@ -293,8 +342,7 @@ def main():
                     exit = True
                     valid = True
                 elif stay == 'y':
-                    # Initiate current state pokemon and moves
-                    my_pokemon = MyPokemon(Pikachu, lvl=lvl_now, xp=xp_now)
+                    # Initiate new wild pokemon state and moves
                     random_poke = random.choice(list(area.wildict))
                     lvl_min, lvl_max = area.wildict[random_poke]
                     wild_pokemon = WildPokemon(random_poke, lvl=random.randint(lvl_min, lvl_max))
