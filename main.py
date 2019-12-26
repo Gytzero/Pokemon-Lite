@@ -3,6 +3,18 @@ import math
 import weakref
 import time
 
+class Type():
+    def __init__(self, typename):
+        self.typename = typename
+    
+    def setEff(self, supereff, notveryeff, ineff):
+        # From attacking move stand point
+        self.supereff = supereff
+        self.notveryeff = notveryeff
+        self.ineff = ineff
+
+    def __str__(self):
+        return self.typename
 
 class Category():
     def __init__(self, ctgname):
@@ -12,8 +24,9 @@ class Category():
         return f"({self.ctgname} attack)"
 
 class Moves():
-    def __init__(self, movename, pwr, category):
+    def __init__(self, movename, movetype, pwr, category):
         self.movename = movename
+        self.movetype = movetype
         self.pwr = pwr
         self.category = category
 
@@ -87,12 +100,28 @@ class MyPokemon(UniquePoke):
     def doMove(self, foeobj, movenum):
         move = self.movelist[int(movenum)-1]
         print(f"Your {self.pokeobj.name} used {move} on the foe's pokemon!")
+        # STAB calculation
+        if move.movetype == self.pokeobj.poketype:
+            stab = 1.5
+        else:
+            stab = 1
+        # Type effectiveness calculation
+        if foeobj.pokeobj.poketype in move.movetype.supereff:
+            eff = 2
+        elif foeobj.pokeobj.poketype in move.movetype.notveryeff:
+            eff = 0.5
+        elif foeobj.pokeobj.poketype in move.movetype.ineff:
+            eff = 0
+        else:
+            eff = 1
+        mod = stab * eff
         print(move.category)
+        print("Mod =",mod)
         if move.category == Phy:
-            mydmg = math.floor(((((2*self.lvl)/5 + 2) * move.pwr * self.satk/foeobj.sdef) / 50) + 2)
+            mydmg = math.floor((((((2*self.lvl)/5 + 2) * move.pwr * self.satk/foeobj.sdef) / 50) + 2) * mod)
             return mydmg
         elif move.category == Spc:
-            mydmg = math.floor(((((2*self.lvl)/5 + 2) * move.pwr * self.sspatk/foeobj.sspdef) / 50) + 2)
+            mydmg = math.floor((((((2*self.lvl)/5 + 2) * move.pwr * self.sspatk/foeobj.sspdef) / 50) + 2) * mod)
             return mydmg
 
     def hpLoss(self, hitdmg):
@@ -108,18 +137,19 @@ class MyPokemon(UniquePoke):
         self.xp += xpgain
         return f"Your pokemon gained {xpgain} exp points!"
 
-    # def getXp(self):
-    #     print(f"Now Your pokemon has {self.xp} exp.")
-    #     return self.xp
+    def getXp(self):
+        print(f"Now Your pokemon has {self.xp} exp.")
+        return self.xp
     
     def evalStat(self):
         print("Current exp:", self.xp, "from", self.xplimit)
         if self.xp >= self.xplimit:
             self.lvl += 1
             self.xp %= self.xplimit
-            print(f"Your pokemon grew to lvl {self.lvl}!")
+            print(f"\nYour pokemon grew to lvl {self.lvl}!")
             for k,v in self.pokeobj.movedict.items():
                 if k == self.lvl and "" not in self.movelist and v not in self.movelist:
+                    time.sleep(0.5)
                     print(f"Your pokemon wants to learn {v}, which move would you want to forget?")
                     time.sleep(0.3)
                     self.showMoves()
@@ -171,6 +201,7 @@ class WildPokemon(UniquePoke):
         self.sdef = math.floor((((self.pokeobj.bdef*2) * self.lvl) / 100) + 5)
         self.sspatk = math.floor((((self.pokeobj.bspatk*2) * self.lvl) / 100) + 5)
         self.sspdef = math.floor((((self.pokeobj.bspdef*2) * self.lvl) / 100) + 5)
+        self.sspe = math.floor((((self.pokeobj.bspe*2) * self.lvl) / 100) + 5)
         # Assigning moveset
         self.movelist = []
         for k,v in self.pokeobj.movedict.items():
@@ -184,20 +215,36 @@ class WildPokemon(UniquePoke):
         self.move3 = self.movelist[2]
         self.move4 = self.movelist[3]
 
-    # def showMoves(self):
-    #     return f"Foe's moves:\n 1.{self.move1}\n 2.{self.move2}\n 3.{self.move3}\n 4.{self.move4}"
+    def showMoves(self):
+        return f"Foe's moves:\n 1.{self.move1}\n 2.{self.move2}\n 3.{self.move3}\n 4.{self.move4}"
 
     def doMove(self, myobj):
         count = countMoves(self)
         movenum = random.randint(1, count)
         move = self.movelist[movenum-1]
         print(f"Foe's {self.pokeobj.name} used {move} on your pokemon!")
+        # STAB calculation
+        if move.movetype == self.pokeobj.poketype:
+            stab = 1.5
+        else:
+            stab = 1
+        # Type effectiveness calculation
+        if myobj.pokeobj.poketype in move.movetype.supereff:
+            eff = 2
+        elif myobj.pokeobj.poketype in move.movetype.notveryeff:
+            eff = 0.5
+        elif myobj.pokeobj.poketype in move.movetype.ineff:
+            eff = 0
+        else:
+            eff = 1
+        mod = stab * eff
         print(move.category)
+        print("Mod =", mod)
         if move.category == Phy:
-            foedmg = math.floor(((((2*self.lvl)/5 + 2) * move.pwr * self.satk/myobj.sdef) / 50) + 2)
+            foedmg = math.floor((((((2*self.lvl)/5 + 2) * move.pwr * self.satk/myobj.sdef) / 50) + 2) * mod)
             return foedmg
         elif move.category == Spc:
-            foedmg = math.floor(((((2*self.lvl)/5 + 2) * move.pwr * self.sspatk/myobj.sspdef) / 50) + 2)
+            foedmg = math.floor((((((2*self.lvl)/5 + 2) * move.pwr * self.sspatk/myobj.sspdef) / 50) + 2) * mod)
             return foedmg
 
     def hpLoss(self, hitdmg):
@@ -227,33 +274,56 @@ class Area():
     def __str__(self):
         return self.areaname
 
+# Type initiations
+Normal = Type("Normal")
+Fire = Type("Fire")
+Water = Type("Water")
+Electric = Type("Electric")
+Grass = Type("Grass")
+Ground = Type("Ground")
+Flying = Type("Flying")
+Bug = Type("Bug")
+Dark = Type("Dark")
+Steel = Type("Steel")
+
+Normal.setEff([], [Steel], [])
+Fire.setEff([Grass, Bug, Steel], [Fire, Water], [])
+Water.setEff([Fire, Ground], [Water, Grass], [])
+Electric.setEff([Water, Flying], [Electric, Grass], [Ground])
+Grass.setEff([Water, Ground], [Fire, Grass, Flying, Bug, Steel], [])
+Ground.setEff([Fire, Electric, Steel], [Grass], [Flying])
+Flying.setEff([Grass, Bug], [Electric, Steel], [])
+Bug.setEff([Grass, Dark], [Fire, Ground, Steel], [])
+Dark.setEff([], [Dark], [])
+Steel.setEff([], [Fire, Water, Electric, Steel], [])
+
 # Move category initiation
 Phy = Category("Physical")
 Spc = Category("Special")
 Stt = Category("Stat")
 
 # Moves initiation
-Tackle = Moves("Tackle", 40, Phy)
-Scratch = Moves("Scratch", 40, Phy)
-Pound = Moves("Pound", 40, Phy)
-Peck = Moves("Peck", 45, Phy)
-Metal_Claw = Moves("Metal Claw", 45, Phy)
-Mud_Shot = Moves("Mud Shot", 45, Spc)
-Vine_Whip = Moves("Vine Whip", 45, Phy)
-Ember = Moves("Ember", 45, Spc)
-Bubble = Moves("Bubble", 45, Spc)
-Thunder_Shock = Moves("Thunder Shock", 45, Spc)
-Slam = Moves("Slam", 50, Phy)
-Shock_Wave = Moves("Shock Wave", 60, Spc)
+Tackle = Moves("Tackle", Normal, 40, Phy)
+Scratch = Moves("Scratch", Normal, 40, Phy)
+Pound = Moves("Pound", Normal, 40, Phy)
+Peck = Moves("Peck", Flying, 45, Phy)
+Metal_Claw = Moves("Metal Claw", Steel, 45, Phy)
+Mud_Shot = Moves("Mud Shot", Ground, 45, Spc)
+Vine_Whip = Moves("Vine Whip", Grass, 45, Phy)
+Ember = Moves("Ember", Fire, 45, Spc)
+Bubble = Moves("Bubble", Water, 45, Spc)
+Thunder_Shock = Moves("Thunder Shock", Electric, 45, Spc)
+Slam = Moves("Slam", Normal, 50, Phy)
+Shock_Wave = Moves("Shock Wave", Electric, 60, Spc)
 
 # Pokemon available initiation
-Pikachu = UniquePoke("Pikachu", "Electric", [35, 55, 40, 50, 50, 90], movedict={2:Scratch, 4:Thunder_Shock, 7:Slam, 12:Shock_Wave, 14:Metal_Claw})
-Treecko = UniquePoke("Treecko", "Grass", [40, 45, 35, 65, 55, 70], movedict={2:Tackle, 4:Peck, 7:Vine_Whip})
-Torchic = UniquePoke("Torchic", "Fire", [45, 60, 40, 70, 50, 45], movedict={2:Scratch, 4:Metal_Claw, 7:Ember})
-Mudkip = UniquePoke("Mudkip", "Water", [50, 70, 50, 50, 50, 40], movedict={2:Pound, 4:Mud_Shot, 7:Bubble})
-Poochyena = UniquePoke("Poochyena", "Dark", [38, 30, 41, 30, 30, 35], movedict={2:Scratch, 2:Peck, 4:Slam})
-Zigzagoon = UniquePoke("Zigzagoon", "Normal", [35, 55, 35, 30, 41, 60], movedict={2:Tackle, 2:Scratch, 4:Pound})
-Wurmple = UniquePoke("Wurmple", "Bug", [45, 45, 35, 20, 30, 20], movedict={2:Pound, 2:Tackle, 4:Peck})
+Pikachu = UniquePoke("Pikachu", Electric, [35, 55, 40, 50, 50, 90], movedict={2:Scratch, 4:Thunder_Shock, 7:Slam, 12:Shock_Wave, 14:Metal_Claw})
+Treecko = UniquePoke("Treecko", Grass, [40, 45, 35, 65, 55, 70], movedict={2:Tackle, 4:Peck, 7:Vine_Whip})
+Torchic = UniquePoke("Torchic", Fire, [45, 60, 40, 70, 50, 45], movedict={2:Scratch, 4:Metal_Claw, 7:Ember})
+Mudkip = UniquePoke("Mudkip", Water, [50, 70, 50, 50, 50, 40], movedict={2:Pound, 4:Mud_Shot, 7:Bubble})
+Poochyena = UniquePoke("Poochyena", Dark, [38, 30, 41, 30, 30, 35], movedict={2:Scratch, 2:Peck, 4:Slam})
+Zigzagoon = UniquePoke("Zigzagoon", Normal, [35, 55, 35, 30, 41, 60], movedict={2:Tackle, 2:Scratch, 4:Pound})
+Wurmple = UniquePoke("Wurmple", Bug, [45, 45, 35, 20, 30, 20], movedict={2:Pound, 2:Tackle, 4:Peck})
 
 # Area initiation
 Route_101 = Area("Route 101", {Poochyena:[2,3], Zigzagoon:[2,3]})
@@ -281,6 +351,30 @@ def countMoves(pokemon):
             count += 1
     return count
 
+def askQuit():
+    valid = False
+    while not valid:
+        # Asking for user's input to continue
+        stay = input("Keep going? [Y/n] ").lower()
+        if stay == 'y':
+            # Back to battle loop
+            time.sleep(0.5)
+            valid = True
+            exit = False
+            print()
+            print("------------------------------")
+            print("------------------------------")
+            print()
+            return valid, exit
+        elif stay == 'n':
+            # Exit the game
+            print("\n~Have a nice day!~")
+            valid = True
+            exit = True
+            return valid, exit
+        else:
+            pass
+
 def main():
     # Greetings
     print("\nWelcome to The Pokemon World!")
@@ -288,9 +382,9 @@ def main():
     time.sleep(0.5)
 
     # Pokemon starting initiation
-    my_pokemon = MyPokemon(Pikachu, lvl=11, xp=0)
     lvl_now = 11
     xp_now = 0
+    my_pokemon = MyPokemon(Pikachu, lvl=lvl_now, xp=xp_now)
     
     # Battle scene
     exit = False
@@ -299,16 +393,15 @@ def main():
         area = chooseArea()
         time.sleep(0.3)
 
-        # Testing
-        print(my_pokemon.movelist)
+        # Pokemon update in loop
         my_pokemon.updateState(lvl_now, xp_now)
         random_poke = random.choice(list(area.wildict))
         lvl_min, lvl_max = area.wildict[random_poke]
         wild_pokemon = WildPokemon(random_poke, lvl=random.randint(lvl_min, lvl_max))
 
         # Print current pokemon state
-        print(my_pokemon)
-        print(wild_pokemon)
+        print(f"{my_pokemon} ({my_pokemon.sspe})")
+        print(f"{wild_pokemon} ({wild_pokemon.sspe})")
         print()
         my_pokemon.showHp()
         wild_pokemon.showHp()
@@ -327,62 +420,68 @@ def main():
             time.sleep(0.5)
             print()
 
-            # Damage calculations
-            mydmg = my_pokemon.doMove(wild_pokemon, choose_move)
-            wild_pokemon.hpLoss(mydmg)
-
-            # If the enemy survives
-            if wild_pokemon.getHp() > 0:
-                wild_pokemon.showHp()
-                time.sleep(0.5)
+            # When your speed is faster
+            if my_pokemon.sspe >= wild_pokemon.sspe:
+                # Your damage calculations
+                mydmg = my_pokemon.doMove(wild_pokemon, choose_move)
+                wild_pokemon.hpLoss(mydmg)
+                # If the enemy survives
+                if wild_pokemon.getHp() > 0:
+                    wild_pokemon.showHp()
+                    time.sleep(0.5)
+                    foedmg = wild_pokemon.doMove(my_pokemon)
+                    my_pokemon.hpLoss(foedmg)
+                    if my_pokemon.getHp() <= 0:
+                        # Exit the battle
+                        print("Your pokemon has fainted.")
+                        print("You have been thrown out of the game")
+                        exit = True
+                    elif my_pokemon.getHp() > 0:
+                        my_pokemon.showHp()
+                        time.sleep(1)
+                        print("\n------------------------------")
+                # Else if the enemy faints
+                elif wild_pokemon.getHp() <= 0:
+                    # Update xp and level gains
+                    print("The foe's pokemon has fainted!")
+                    time.sleep(0.5)
+                    print(my_pokemon.gainXp(wild_pokemon.yieldXp))
+                    lvl_now, xp_now = my_pokemon.evalStat()
+                    time.sleep(0.3)
+                    # my_pokemon.updateState(lvl_now, xp_now)
+                    valid, exit = askQuit()
+                            
+            # When your speed is lower
+            elif my_pokemon.sspe < wild_pokemon.sspe:
+                # The opponent's damage calculation
                 foedmg = wild_pokemon.doMove(my_pokemon)
                 my_pokemon.hpLoss(foedmg)
+                # If your pokemon faints
                 if my_pokemon.getHp() <= 0:
-                    # Exit the battle
                     print("Your pokemon has fainted.")
                     print("You have been thrown out of the game")
                     exit = True
+                # Else if your pokemon survives
                 elif my_pokemon.getHp() > 0:
                     my_pokemon.showHp()
-                    time.sleep(1)
-                    print()
-                    print("------------------------------")
-
-            # Else if the enemy faints
-            elif wild_pokemon.getHp() <= 0:
-                # Update xp and level gains
-                print("The foe's pokemon has fainted!")
-                time.sleep(0.5)
-                print(my_pokemon.gainXp(wild_pokemon.yieldXp))
-                lvl_now, xp_now = my_pokemon.evalStat()
-                time.sleep(0.3)
-                # my_pokemon.updateState(lvl_now, xp_now)
-                # time.sleep(0.3)
-                valid = False
-                while not valid:
-                    # Asking for user's input to continue
-                    stay = input("Keep going? [Y/n] ").lower()
-                    if stay == 'n':
-                        # Exit the game
-                        print("\n~Have a nice day!~")
-                        valid = True
-                        exit = True
-                    elif stay == 'y':
-                        # Initiate new area, wild pokemon, and moves
+                    mydmg = my_pokemon.doMove(wild_pokemon, choose_move)
+                    wild_pokemon.hpLoss(mydmg)
+                    time.sleep(0.5)
+                    # If the enemy survives
+                    if wild_pokemon.getHp() > 0:
+                        wild_pokemon.showHp()
+                        time.sleep(1)
+                        print("\n------------------------------")
+                    # Else if the enemy faints
+                    elif wild_pokemon.getHp() <= 0:
+                        # Update xp and level gains
+                        print("The foe's pokemon has fainted!")
                         time.sleep(0.5)
-                        # print()
-                        # area = chooseArea()
-                        # time.sleep(0.3)
-                        # random_poke = random.choice(list(area.wildict))
-                        # lvl_min, lvl_max = area.wildict[random_poke]
-                        # wild_pokemon = WildPokemon(random_poke, lvl=random.randint(lvl_min, lvl_max))
-                        valid = True
-                        print()
-                        print("------------------------------")
-                        print("------------------------------")
-                        print()
-                    else:
-                        pass
+                        print(my_pokemon.gainXp(wild_pokemon.yieldXp))
+                        lvl_now, xp_now = my_pokemon.evalStat()
+                        time.sleep(0.3)
+                        # my_pokemon.updateState(lvl_now, xp_now)
+                        valid, exit = askQuit()
 
 
 if __name__ == '__main__':
