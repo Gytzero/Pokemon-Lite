@@ -1,8 +1,11 @@
+## This is a text-based pokemon RPG - styled battle 
+## Author: Antonius Anggito Arissaputro
+
+
 import random
 import math
 import weakref
 from time import sleep
-
 
 ###-------------------------------------------------------------- CLASSES -----------------------------------------------------------------###
 
@@ -20,6 +23,7 @@ class Type():
     def __str__(self):
         return self.typename
 
+
 class Category():
     '''  To specify move's category '''
     def __init__(self, ctgname):
@@ -27,6 +31,7 @@ class Category():
 
     def __str__(self):
         return f"({self.ctgname} move)"
+
 
 class Moves():
     '''  Create moves that can be learned by pokemon '''
@@ -37,9 +42,12 @@ class Moves():
         self.acc = acc
         self.category = category
     
-    def addEffect(self, statchgobj, bystage):
+    def addEffect(self, pokeobj_my, pokeobj_wd, statidx, bystage):
         '''  For stat category moves only '''
-        self.statchgobj = statchgobj
+        # From my pokemon and wild pokemon perspective respectively
+        self.pokeobj_my = pokeobj_my
+        self.pokeobj_wd = pokeobj_wd
+        self.statidx = statidx
         self.bystage = bystage
 
     def getMove(self):
@@ -109,8 +117,8 @@ class MyPokemon(UniquePoke):
 
     def showStat(self):
         ''' To show current pokemon stat '''
-        print(self.statlist)
-        print("Total:", sum(self.statlist))
+        self.statlist = [self.shp, self.satk, self.sdef, self.sspatk, self.sspdef, self.sspe]
+        print(self.statlist, sum(self.statlist))
 
     def showMoves(self):
         ''' To inform current move available '''
@@ -120,7 +128,14 @@ class MyPokemon(UniquePoke):
         ''' Retrieves foe's obj and move chosen,
             and do move's work '''
         move = self.movelist[int(movenum)-1]
-        print(f"Your {self.pokeobj.name} used {move} on the foe's pokemon!")
+        # Different printing for self stat moves
+        if move.category == Stt:
+            if move.pokeobj_my == self:
+                print(f"Your {self.pokeobj.name} used {move}! {move.category}")
+            else:
+                print(f"Your {self.pokeobj.name} used {move} on the foe's pokemon! {move.category}")
+        else:
+            print(f"Your {self.pokeobj.name} used {move} on the foe's pokemon! {move.category}")
         # STAB calculation
         if move.movetype == self.pokeobj.poketype1 or move.movetype == self.pokeobj.poketype1:
             stab = 1.5
@@ -145,7 +160,6 @@ class MyPokemon(UniquePoke):
         else:
             eff = 1
         mod = stab * eff
-        print(move.category)
         print("Mod =",mod)
         # Use move accuracy chance
         if random.randrange(0, 100) < move.acc:
@@ -155,9 +169,22 @@ class MyPokemon(UniquePoke):
             elif move.category == Spc:
                 mydmg = math.floor((((((2*self.lvl)/5 + 2) * move.pwr * self.sspatk/foeobj.sspdef) / 50) + 2) * mod)
                 return mydmg
-            ### NOT WORKING ###
             elif move.category == Stt:
-                foeobj.sdef = assignEffect(move, move.statchgobj, move.bystage)
+                # Call calcEffect function using pokeobj seen by my_pokemon
+                afterstat = calcEffect(move, move.pokeobj_my, move.statidx, move.bystage)
+                # Correspondeces to its index on statlist
+                if move.statidx == 1:
+                    move.pokeobj_my.satk = afterstat
+                elif move.statidx == 2:
+                    move.pokeobj_my.sdef = afterstat
+                elif move.statidx == 3:
+                    move.pokeobj_my.sspatk = afterstat
+                elif move.statidx == 4:
+                    move.pokeobj_my.sspdef = afterstat
+                elif move.statidx == 5:
+                    move.pokeobj_my.sspe = afterstat
+                # View stat of both pokemon
+                self.showStat()
                 foeobj.showStat()
                 return 0
         else:
@@ -251,7 +278,6 @@ class WildPokemon(UniquePoke):
         self.sspatk = math.floor((((self.pokeobj.bspatk*2) * self.lvl) / 100) + 5)
         self.sspdef = math.floor((((self.pokeobj.bspdef*2) * self.lvl) / 100) + 5)
         self.sspe = math.floor((((self.pokeobj.bspe*2) * self.lvl) / 100) + 5)
-        self.statlist = [self.shp, self.satk, self.sdef, self.sspatk, self.sspdef, self.sspe]
         # Assigning moveset
         self.movelist = []
         for k,v in self.pokeobj.movedict.items():
@@ -267,8 +293,8 @@ class WildPokemon(UniquePoke):
 
     def showStat(self):
         ''' To show current pokemon stat '''
-        print(self.statlist)
-        print("Total:", sum(self.statlist))
+        self.statlist = [self.shp, self.satk, self.sdef, self.sspatk, self.sspdef, self.sspe]
+        print(self.statlist, sum(self.statlist))
 
     def showMoves(self):
         ''' To inform current move available '''
@@ -280,7 +306,14 @@ class WildPokemon(UniquePoke):
         count = countMoves(self)
         movenum = random.randint(1, count)
         move = self.movelist[movenum-1]
-        print(f"Foe's {self.pokeobj.name} used {move} on your pokemon!")
+        # Different printing for self stat moves
+        if move.category == Stt:
+            if move.pokeobj_wd == self:
+                print(f"Foe's {self.pokeobj.name} used {move}! {move.category}")
+            else:
+                print(f"Foe's {self.pokeobj.name} used {move} on your pokemon! {move.category}")
+        else:
+            print(f"Foe's {self.pokeobj.name} used {move} on your pokemon! {move.category}")
         # STAB calculation
         if move.movetype == self.pokeobj.poketype1 or move.movetype == self.pokeobj.poketype1:
             stab = 1.5
@@ -305,7 +338,6 @@ class WildPokemon(UniquePoke):
         else:
             eff = 1
         mod = stab * eff
-        print(move.category)
         print("Mod =", mod)
         # Use move accuracy chance
         if random.randrange(0, 100) < move.acc:
@@ -315,6 +347,24 @@ class WildPokemon(UniquePoke):
             elif move.category == Spc:
                 foedmg = math.floor((((((2*self.lvl)/5 + 2) * move.pwr * self.sspatk/myobj.sspdef) / 50) + 2) * mod)
                 return foedmg
+            elif move.category == Stt:
+                # Call calcEffect function using pokeobj seen by wild_pokemon
+                afterstat = calcEffect(move, move.pokeobj_wd, move.statidx, move.bystage)
+                # Correspondeces to its index on statlist
+                if move.statidx == 1:
+                    move.pokeobj_wd.satk = afterstat
+                elif move.statidx == 2:
+                    move.pokeobj_wd.sdef = afterstat
+                elif move.statidx == 3:
+                    move.pokeobj_wd.sspatk = afterstat
+                elif move.statidx == 4:
+                    move.pokeobj_wd.sspdef = afterstat
+                elif move.statidx == 5:
+                    move.pokeobj_wd.sspe = afterstat
+                # View both pokemon stat
+                myobj.showStat()
+                self.showStat()
+                return 0
         else:
             print("The attack missed!")
             return 0
@@ -336,6 +386,7 @@ class WildPokemon(UniquePoke):
 
     def __repr__(self):
         return self.name
+
 
 class Area():
     ''' Create area consisting a range of wild pokemon '''
@@ -407,25 +458,23 @@ def askQuit():
         else:
             pass
 
-def assignEffect(move, statobj, bystage):
-    ### NOT WORKING ###
-    print("awal", statobj)
-    # When lowering stat
+def calcEffect(move, pokeobj, statidx, bystage):
+    statobj = pokeobj.statlist[statidx]
+    # For lowering stat move
     if move.bystage < 0:
         multiplier = 2 / (2+(-move.bystage))
         print(multiplier)
-        statobj *= multiplier
-        print(statobj)
-        print(f"The {statobj} stat was lowered by {-bystage} stage!")
+        statobj = math.floor(statobj * multiplier)
+        print(f"The stat was lowered by {-bystage} stage!")
         return statobj
-    # When increasing stat
+    # For increasing stat move
     elif move.bystage > 0:
         multiplier = (2+move.bystage) / 2
         print(multiplier)
-        statobj *= multiplier
-        print(statobj)
-        print(f"The {statobj} stat was rose by {bystage} stage!")
+        statobj = math.floor(statobj * multiplier)
+        print(f"The stat was increased by {bystage} stage!")
         return statobj
+
 ##############################################################################################################################################
 
 
@@ -480,9 +529,6 @@ Stt = Category("Stat")
 Tackle = Moves("Tackle", Normal, 40, 100, Phy)
 Scratch = Moves("Scratch", Normal, 40, 100, Phy)
 Pound = Moves("Pound", Normal, 40, 100, Phy)
-
-Leer = Moves("Leer", Empty, 0, 100, Stt)
-
 Peck = Moves("Peck", Flying, 45, 100, Phy)
 Metal_Claw = Moves("Metal Claw", Steel, 45, 95, Phy)
 Mud_Shot = Moves("Mud Shot", Ground, 45, 95, Spc)
@@ -492,20 +538,23 @@ Bubble = Moves("Bubble", Water, 45, 95, Spc)
 Thunder_Shock = Moves("Thunder Shock", Electric, 45, 95, Spc)
 Slam = Moves("Slam", Normal, 50, 90, Phy)
 Shock_Wave = Moves("Shock Wave", Electric, 60, 85, Spc)
+Leer = Moves("Leer", Empty, 0, 100, Stt)
+Growl = Moves("Growl", Empty, 0, 100, Stt)
+Swords_Dance = Moves("Swords Dance", Empty, 0, 100, Stt)
 
 # Available pokemon initiation
-Pikachu = UniquePoke("Pikachu", Electric, Steel, [35, 55, 40, 50, 50, 90], movedict={2:Leer, 4:Thunder_Shock, 7:Peck, 12:Mud_Shot, 14:Shock_Wave})
-Treecko = UniquePoke("Treecko", Dragon, Ground, [40, 45, 35, 65, 55, 70], movedict={2:Tackle, 4:Peck, 7:Vine_Whip})
+Pikachu = UniquePoke("Pikachu", Electric, Steel, [35, 55, 40, 50, 50, 90], movedict={2:Leer, 4:Slam, 7:Swords_Dance, 12:Growl, 14:Shock_Wave})
+Treecko = UniquePoke("Treecko", Grass, Dragon, [40, 45, 35, 65, 55, 70], movedict={2:Tackle, 4:Peck, 7:Vine_Whip})
 Torchic = UniquePoke("Torchic", Fire, Fighting, [45, 60, 40, 70, 50, 45], movedict={2:Scratch, 4:Metal_Claw, 7:Ember})
 Mudkip = UniquePoke("Mudkip", Water, Ground, [50, 70, 50, 50, 50, 40], movedict={2:Pound, 4:Mud_Shot, 7:Bubble})
 Poochyena = UniquePoke("Poochyena", Dark, Ghost, [38, 30, 41, 30, 30, 35], movedict={2:Scratch, 2:Peck, 4:Slam})
-Zigzagoon = UniquePoke("Zigzagoon", Normal, Rock, [35, 55, 35, 30, 41, 60], movedict={2:Tackle, 2:Scratch, 4:Pound})
+Zigzagoon = UniquePoke("Zigzagoon", Normal, Rock, [35, 55, 35, 30, 41, 60], movedict={2:Leer, 2:Growl, 4:Swords_Dance})
 Wurmple = UniquePoke("Wurmple", Bug, Poison, [45, 45, 35, 20, 30, 20], movedict={2:Pound, 2:Tackle, 4:Peck})
 
 # Available areas initiation
 Route_101 = Area("Route 101", {Poochyena:[2,3], Zigzagoon:[2,3]})
 Route_103 = Area("Route 103", {Poochyena:[2,4], Zigzagoon:[2,4], Wurmple:[2,4]})
-Victory_Road = Area("Victory Road", {Treecko:[9,12], Torchic:[9,12], Mudkip:[9,12], Poochyena:[9,12], Zigzagoon:[9,12], Wurmple:[9,12]})
+Victory_Road = Area("Victory Road", {Treecko:[9,12], Torchic:[9,12], Mudkip:[9,12], Zigzagoon:[9,12], Zigzagoon:[9,12], Zigzagoon:[9,12]})
 
 ###############################################################################################################################################
 ###############################################################################################################################################
@@ -514,7 +563,7 @@ Victory_Road = Area("Victory Road", {Treecko:[9,12], Torchic:[9,12], Mudkip:[9,1
 def main():
     ''' This is the main function of the program '''
 
-    # Greetings
+    # Greeting
     print("\nWelcome to The Pokemon World!")
     print("-----------------------------")
     sleep(0.5)
@@ -538,7 +587,9 @@ def main():
         wild_pokemon = WildPokemon(random_poke, lvl=random.randint(lvl_min, lvl_max))
 
         # Testing stat changing move
-        Leer.addEffect(wild_pokemon.sdef, -1)
+        Leer.addEffect(wild_pokemon, my_pokemon, 2, -1)
+        Growl.addEffect(wild_pokemon, my_pokemon, 1, -1)
+        Swords_Dance.addEffect(my_pokemon, wild_pokemon, 1, 2)
 
         # Print current pokemon state
         print(f"{my_pokemon} ({my_pokemon.sspe})")
@@ -569,11 +620,11 @@ def main():
                 # Your damage calculations
                 mydmg = my_pokemon.doMove(wild_pokemon, choose_move)
                 wild_pokemon.hpLoss(mydmg)
-                wild_pokemon.showStat()
                 # If the enemy survives
                 if wild_pokemon.getHp() > 0:
                     wild_pokemon.showHp()
                     sleep(0.5)
+                    print()
                     foedmg = wild_pokemon.doMove(my_pokemon)
                     my_pokemon.hpLoss(foedmg)
                     if my_pokemon.getHp() <= 0:
@@ -609,6 +660,7 @@ def main():
                 # Else if your pokemon survives
                 elif my_pokemon.getHp() > 0:
                     my_pokemon.showHp()
+                    print()
                     mydmg = my_pokemon.doMove(wild_pokemon, choose_move)
                     wild_pokemon.hpLoss(mydmg)
                     sleep(0.5)
