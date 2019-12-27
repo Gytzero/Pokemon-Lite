@@ -1,2 +1,2 @@
 # Pokemon-Lite
-This is my experiment to create a pokemon-like game
+Working on text-based full implementation of Pokemon RPG game
