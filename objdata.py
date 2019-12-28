@@ -70,7 +70,7 @@ Zigzagoon = UniquePoke("Zigzagoon", Normal, Rock, [38, 30, 41, 30, 41, 60], move
 Wurmple = UniquePoke("Wurmple", Bug, Poison, [45, 45, 35, 20, 30, 20], movedict={2:Pound, 3:Tackle, 4:Peck})
 
 # Nature initialization
-file = open("nature_list.dat","r")
+# The natures of pokemon are now read from text file
 natures = []
 
 i = 0
