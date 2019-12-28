@@ -60,7 +60,6 @@ def main():
     lvl_now = 11
     xp_now = 0
     my_pokemon = MyPokemon(Pikachu, lvl=lvl_now, xp=xp_now)
-    print("nowrung")
     
     # Battle scene
     exit = False
