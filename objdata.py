@@ -70,31 +70,16 @@ Zigzagoon = UniquePoke("Zigzagoon", Normal, Rock, [38, 30, 41, 30, 41, 60], move
 Wurmple = UniquePoke("Wurmple", Bug, Poison, [45, 45, 35, 20, 30, 20], movedict={2:Pound, 3:Tackle, 4:Peck})
 
 # Nature initialization
-Lonely = Nature("Lonely", 'satk', 'sdef')
-Brave = Nature("Brave", 'satk', 'sspe')
-Adamant = Nature("Adamant", 'satk', 'sspatk')
-Naughty = Nature("Naughty", 'satk', 'sspdef')
-Bold = Nature("Bold", 'sdef', 'satk')
-Relaxed = Nature("Relaxed", 'sdef', 'sspe')
-Impish = Nature("Impish", 'sdef', 'sspatk')
-Lax = Nature("Lax", 'sdef', 'sspdef')
-Timid = Nature("Timid", 'sspe', 'satk')
-Hasty = Nature("Hasty", 'sspe', 'sdef')
-Jolly = Nature("Jolly", 'sspe', 'sspatk')
-Naive = Nature("Naive", 'sspe', 'sspdef')
-Modest = Nature("Modest", 'sspatk', 'satk')
-Mild = Nature("Mild", 'sspatk', 'sdef')
-Quiet = Nature("Quiet", 'sspatk', 'sspe')
-Rash = Nature("Rash", 'sspatk', 'sspdef')
-Calm = Nature("Calm", 'sspdef', 'satk')
-Gentle = Nature("Gentle", 'sspdef', 'sdef')
-Sassy = Nature("Sassy", 'sspdef', 'sspe')
-Careful = Nature("Careful", 'sspdef', 'sspatk')
-Bashful = Nature("Bashful", 'satk', 'satk')
-Docile = Nature("Docile", 'sdef', 'sdef')
-Hardy = Nature("Hardy", 'sspatk', 'sspatk')
-Quicky = Nature("Quicky", 'sspdef', 'sspdef')
-Serious = Nature("Serious", 'sspe', 'sspe')
+file = open("nature_list.dat","r")
+natures = []
+
+i = 0
+with open("./dat/nature_list.dat", "r") as file:
+    for line in file:
+        args = line.rstrip('\n').split(',')
+        natures.append(Nature(args[0], args[1], args[2]))
+        i += 1
+
 
 # Available areas initialization
 Route_101 = Area("Route 101", {Poochyena:[2,3], Zigzagoon:[2,3]})

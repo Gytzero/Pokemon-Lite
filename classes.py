@@ -15,7 +15,7 @@ class Nature():
         self.naturename = naturename
         self.increase = increase
         self.decrease = decrease
-    
+
     def __str__(self):
         return self.naturename
 
@@ -23,7 +23,7 @@ class Type():
     '''  For move and pokemon type '''
     def __init__(self, typename):
         self.typename = typename
-    
+
     def setEff(self, supereff, notveryeff, ineff):
         # From attacking move stand point
         self.supereff = supereff
@@ -59,7 +59,7 @@ class Moves():
         self.pptot = pptot
         self.pp = pptot
         self.category = category
-    
+
     def addEffect(self, pokeobj_my, pokeobj_wd, statidx, bystage):
         '''  For stat category moves only '''
         # From my pokemon and wild pokemon perspective respectively
@@ -286,7 +286,7 @@ class MyPokemon(UniquePoke):
         ''' Get current exp value '''
         print(f"Now Your pokemon has {self.xp} exp.")
         return self.xp
-    
+
     def evalStat(self):
         ''' Evaluate state after battle
             including lvl up, exp now, and new move '''
@@ -317,7 +317,7 @@ class MyPokemon(UniquePoke):
             return self.lvl, self.xp
         else:
             return self.lvl, self.xp
-        
+
     def updateState(self, lvl, xp):
         ''' Update stat of mycurrent pokemon
             due to lvl up after battle '''
@@ -337,7 +337,7 @@ class MyPokemon(UniquePoke):
         self.stagespatk = 0
         self.stagespdef = 0
         self.stagespe = 0
-        
+
     def __str__(self):
         return f"You have a lvl {self.lvl} {self.pokeobj.name}."
 
@@ -519,7 +519,7 @@ class WildPokemon(UniquePoke):
     def showHp(self):
         ''' Print current HP state '''
         print(f"*Foe's {self.pokeobj.name} HP is now {self.shp}.")
-        
+
     def __str__(self):
         return f"A wild lvl {self.lvl} {self.pokeobj.name} appeared!"
 
