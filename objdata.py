@@ -61,7 +61,7 @@ Growl = Moves("Growl", Empty, 0, 100, 40, Stt)
 Swords_Dance = Moves("Swords Dance", Empty, 0, 100, 5, Stt)
 
 # Available pokemon initialization
-Pikachu = UniquePoke("Pikachu", Electric, Steel, [35, 55, 40, 50, 50, 90], movedict={2:Metal_Claw, 4:Slam, 7:Swords_Dance, 12:Thunder_Shock, 14:Shock_Wave})
+Pikachu = UniquePoke("Pikachu", Electric, Steel, [35, 55, 40, 50, 50, 90], movedict={2:Leer, 4:Slam, 7:Swords_Dance, 12:Thunder_Shock, 14:Shock_Wave})
 Treecko = UniquePoke("Treecko", Grass, Dragon, [40, 45, 35, 65, 55, 70], movedict={2:Tackle, 4:Peck, 7:Vine_Whip})
 Torchic = UniquePoke("Torchic", Fire, Fighting, [45, 60, 40, 70, 50, 45], movedict={2:Scratch, 4:Metal_Claw, 7:Ember})
 Mudkip = UniquePoke("Mudkip", Water, Ground, [50, 70, 50, 50, 50, 40], movedict={2:Pound, 4:Mud_Shot, 7:Bubble})

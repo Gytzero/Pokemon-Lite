@@ -60,12 +60,12 @@ class Moves():
         self.pp = pptot
         self.category = category
 
-    def addEffect(self, pokeobj_my, pokeobj_wd, statidx, bystage):
+    def addEffect(self, pokeobj_my, pokeobj_wd, stat, bystage):
         '''  For stat category moves only '''
         # From my pokemon and wild pokemon perspective respectively
         self.pokeobj_my = pokeobj_my
         self.pokeobj_wd = pokeobj_wd
-        self.statidx = statidx
+        self.stat = stat
         self.bystage = bystage
 
     def getMove(self):
@@ -142,8 +142,8 @@ class MyPokemon(UniquePoke):
 
     def showStat(self):
         ''' To show current pokemon stat '''
-        self.statlist = [self.shp, self.satk, self.sdef, self.sspatk, self.sspdef, self.sspe]
-        print(self.statlist, sum(self.statlist))
+        self.newstatlist = [self.shp, self.satk, self.sdef, self.sspatk, self.sspdef, self.sspe]
+        print(self.newstatlist, sum(self.newstatlist))
 
     def showMoves(self):
         ''' To inform current move and PP available '''
@@ -208,65 +208,10 @@ class MyPokemon(UniquePoke):
                 return mydmg
             elif move.category == Stt:
                 #Call calcEffect function using pokeobj seen by my_pokemon
-                afterstat = calcEffect(move, move.pokeobj_my, move.statidx, move.bystage)
-                # exec(move.pokeobj_my + "." + move.stat + " = afterstat")
-                # Correspondeces to its index on statlist
-                if move.statidx == 1:
-                    if self.stageatk >= 6:
-                        print("Foe's attack can't go any higher")
-                    elif self.stageatk <= -6 or move.pokeobj_my.satk == 1:
-                        print("Foe's attack can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_my.satk:
-                            self.stageatk += move.bystage
-                        elif afterstat < move.pokeobj_my.satk:
-                            self.stageatk += move.bystage
-                        move.pokeobj_my.satk = afterstat
-                elif move.statidx == 2:
-                    if self.stagedef >= 6:
-                        print("Foe's defense can't go any higher")
-                    elif self.stagedef <= -6 or move.pokeobj_my.sdef == 1:
-                        print("Foe's defense can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_my.sdef:
-                            self.stagedef += move.bystage
-                        elif afterstat < move.pokeobj_my.sdef:
-                            self.stagedef += move.bystage
-                        move.pokeobj_my.sdef = afterstat
-                elif move.statidx == 3:
-                    if self.stagespatk >= 6:
-                        print("Foe's special attack can't go any higher")
-                    elif self.stagespatk <= -6 or move.pokeobj_my.sspatk == 1:
-                        print("Foe's special attack can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_my.sspatk:
-                            self.stagespatk += move.bystage
-                        elif afterstat < move.pokeobj_my.sspatk:
-                            self.stagespatk += move.bystage
-                        move.pokeobj_my.sspatk = afterstat
-                elif move.statidx == 4:
-                    if self.stagespdef >= 6:
-                        print("Foe's special defense can't go any higher")
-                    elif self.stagespdef <= -6 or move.pokeobj_my.sspdef == 1:
-                        print("Foe's special defense can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_my.sspdef:
-                            self.stagespdef += move.bystage
-                        elif afterstat < move.pokeobj_my.sspdef:
-                            self.stagespdef += move.bystage
-                        move.pokeobj_my.sspdef = afterstat
-                elif move.statidx == 5:
-                    if self.stagespe >= 6:
-                        print("Foe's speed can't go any higher")
-                    elif self.stagespe <= -6 or move.pokeobj_my.sspe == 1:
-                        print("Foe's speed can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_my.sspe:
-                            self.stagespe += move.bystage
-                        elif afterstat < move.pokeobj_my.sspe:
-                            self.stagespe += move.bystage
-                        move.pokeobj_my.sspe = afterstat
+                calcEffect(move, move.pokeobj_my, move.stat, move.bystage)
                 # View stat of both pokemon
+                print(self.stages)
+                print(foeobj.stages)
                 self.showStat()
                 foeobj.showStat()
                 return 0
@@ -351,11 +296,7 @@ class MyPokemon(UniquePoke):
         self.calcNature()
         self.xplimit = self.lvl * 3
         # Stat stage initialization
-        self.stageatk = 0
-        self.stagedef = 0
-        self.stagespatk = 0
-        self.stagespdef = 0
-        self.stagespe = 0
+        self.stages = [0, 0, 0, 0, 0, 0]
 
     def __str__(self):
         return f"You have a lvl {self.lvl} {self.pokeobj.name}."
@@ -381,11 +322,7 @@ class WildPokemon(UniquePoke):
         self.sspe = math.floor((((self.pokeobj.bspe*2) * self.lvl) / 100) + 5)
         self.calcNature()
         # Stat stage initialization
-        self.stageatk = 0
-        self.stagedef = 0
-        self.stagespatk = 0
-        self.stagespdef = 0
-        self.stagespe = 0
+        self.stages = [0, 0, 0, 0, 0, 0]
         # Assigning moveset
         self.movelist = []
         for k,v in self.pokeobj.movedict.items():
@@ -406,8 +343,8 @@ class WildPokemon(UniquePoke):
 
     def showStat(self):
         ''' To show current pokemon stat '''
-        self.statlist = [self.shp, self.satk, self.sdef, self.sspatk, self.sspdef, self.sspe]
-        print(self.statlist, sum(self.statlist))
+        self.newstatlist = [self.shp, self.satk, self.sdef, self.sspatk, self.sspdef, self.sspe]
+        print(self.newstatlist, sum(self.newstatlist))
 
     def showMoves(self):
         ''' To inform current move available '''
@@ -462,64 +399,10 @@ class WildPokemon(UniquePoke):
                 return foedmg
             elif move.category == Stt:
                 # Call calcEffect function using pokeobj seen by wild_pokemon
-                afterstat = calcEffect(move, move.pokeobj_wd, move.statidx, move.bystage)
-                # Correspondeces to its index on statlist
-                if move.statidx == 1:
-                    if self.stageatk >= 6:
-                        print("Your pokemon's attack can't go any higher")
-                    elif self.stageatk <= -6 or move.pokeobj_wd.satk == 1:
-                        print("Your pokemon's attack can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_wd.satk:
-                            self.stageatk += move.bystage
-                        elif afterstat < move.pokeobj_wd.satk:
-                            self.stageatk += move.bystage
-                        move.pokeobj_wd.satk = afterstat
-                elif move.statidx == 2:
-                    if self.stagedef >= 6:
-                        print("Your pokemon's defense can't go any higher")
-                    elif self.stagedef <= -6 or move.pokeobj_wd.sdef == 1:
-                        print("Your pokemon's defense can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_wd.sdef:
-                            self.stagedef += move.bystage
-                        elif afterstat < move.pokeobj_wd.sdef:
-                            self.stagedef += move.bystage
-                        move.pokeobj_wd.sdef = afterstat
-                elif move.statidx == 3:
-                    if self.stagespatk >= 6:
-                        print("Your pokemon's special attack can't go any higher")
-                    elif self.stagespatk <= -6 or move.pokeobj_wd.sspatk == 1:
-                        print("Your pokemon's special attack can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_wd.sspatk:
-                            self.stagespatk += move.bystage
-                        elif afterstat < move.pokeobj_wd.sspatk:
-                            self.stagespatk += move.bystage
-                        move.pokeobj_wd.sspatk = afterstat
-                elif move.statidx == 4:
-                    if self.stagespdef >= 6:
-                        print("Your pokemon's special defense can't go any higher")
-                    elif self.stagespdef <= -6 or move.pokeobj_wd.sspdef == 1:
-                        print("Your pokemon's special defense can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_wd.sspdef:
-                            self.stagespdef += move.bystage
-                        elif afterstat < move.pokeobj_wd.sspdef:
-                            self.stagespdef += move.bystage
-                        move.pokeobj_wd.sspdef = afterstat
-                elif move.statidx == 5:
-                    if self.stagespe >= 6:
-                        print("Your pokemon's speed can't go any higher")
-                    elif self.stagespe <= -6 or move.pokeobj_wd.sspe == 1:
-                        print("Your pokemon's speed can't go any lower")
-                    else:
-                        if afterstat >= move.pokeobj_wd.sspe:
-                            self.stagespe += move.bystage
-                        elif afterstat < move.pokeobj_wd.sspe:
-                            self.stagespe += move.bystage
-                        move.pokeobj_wd.sspe = afterstat
+                calcEffect(move, move.pokeobj_wd, move.stat, move.bystage)
                 # View both pokemon stat
+                print(myobj.stages)
+                print(self.stages)
                 myobj.showStat()
                 self.showStat()
                 return 0
@@ -574,23 +457,23 @@ def countMoves(pokemon):
             count += 1
     return count
 
-def calcEffect(move, pokeobj, statidx, bystage):
-    stat = pokeobj.statlist[statidx]
-    # For lowering stat move
-    if move.bystage < 0:
-        multiplier = 2 / (2+(-move.bystage))
-        print(multiplier)
-        stat = math.floor(stat * multiplier)
-        #loc = {}
-        # exec('a = math.floor(pokeobj.' + stat + ' * multiplier)', globals(), loc)
-        #print(loc['a'])
-        print(f"The stat was lowered by {-bystage} stage!")
-        return stat
-    # For increasing stat move
-    elif move.bystage > 0:
-        multiplier = (2+move.bystage) / 2
-        print(multiplier)
-        stat = math.floor(stat * multiplier)
-        # exec("hasil = math.floor(pokeobj." + stat + " * multiplier)")
-        print(f"The stat was increased by {bystage} stage!")
-        return stat
+def calcEffect(move, pokeobj, stat, bystage):
+    statdict = {'satk': 1, 'sdef': 2, 'sspatk': 3, 'sspdef': 4, 'sspe': 5}
+    pokeobj.stages[statdict[stat]] += bystage
+    if pokeobj.stages[statdict[stat]] > 6:
+        print(f"The {stat} can't go any higher")
+        pokeobj.stages[statdict[stat]] -= bystage
+    elif pokeobj.stages[statdict[stat]] < -6 or pokeobj.newstatlist[statdict[stat]] == 1:
+        print(f"The {stat} can't go any lower")
+        pokeobj.stages[statdict[stat]] -= bystage
+    else:
+        if move.bystage < 0:
+            multiplier = 2 / (2+(-move.bystage))
+            print(multiplier)
+            exec("pokeobj." + stat + " = math.floor(pokeobj." + stat + " * multiplier)")
+            print(f"The {stat} was lowered by {-bystage} stage!")
+        elif move.bystage > 0:
+            multiplier = (2+move.bystage) / 2
+            print(multiplier)
+            exec("pokeobj." + stat + " = math.floor(pokeobj." + stat + " * multiplier)")
+            print(f"The {stat} was increased by {bystage} stage!")

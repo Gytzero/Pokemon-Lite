@@ -1,8 +1,8 @@
 ## This is a text-based pokemon RPG - styled battle 
 ## Author: Antonius Anggito Arissaputro
 
-from objdata import *
 from classes import *
+from objdata import *
 
 
 def chooseArea():
@@ -72,9 +72,9 @@ def main():
         wild_pokemon = WildPokemon(random_poke, lvl=random.randint(lvl_min, lvl_max))
 
         # Testing stat changing move
-        Leer.addEffect(wild_pokemon, my_pokemon, 2, -1)
-        Growl.addEffect(wild_pokemon, my_pokemon, 1, -1)
-        Swords_Dance.addEffect(my_pokemon, wild_pokemon, 1, 2)
+        Leer.addEffect(wild_pokemon, my_pokemon, 'sdef', -1)
+        Growl.addEffect(wild_pokemon, my_pokemon, 'satk', -1)
+        Swords_Dance.addEffect(my_pokemon, wild_pokemon, 'satk', 2)
 
         # Print current pokemon state
         print(f"{my_pokemon} ({my_pokemon.nature})")
