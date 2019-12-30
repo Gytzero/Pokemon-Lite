@@ -146,10 +146,19 @@ class MyPokemon(UniquePoke):
         print(self.statlist, sum(self.statlist))
 
     def showMoves(self):
-        ''' To inform current move available '''
-        # print("Moves available:\n 1.{0:10}({0.pp}/{0.pptot}) 3.{1}({1.pp}/{1.pptot})\n 2.{2:10}({2.pp}/{2.pptot}) 4.{3}({3.pp}/{3.pptot})"\
-        #     .format(self.move1, self.move3, self.move2, self.move4))
-        print("Moves available:\n 1.{0:20} 3.{1}\n 2.{2:20} 4.{3}".format(str(self.move1), str(self.move3), str(self.move2), str(self.move4)))
+        ''' To inform current move and PP available '''
+        count = countMoves(self)
+        # print("Moves available:\n 1.{0:20} 3.{1}\n 2.{2:20} 4.{3}".format(str(self.move1), str(self.move3), str(self.move2), str(self.move4)))
+        # print(self.move1.pp, self.move2.pp, self.move3.pp, self.move4.pp)
+        for i in range(count):
+            if i == 0:
+                print(f"{i+1}. {str(self.movelist[i]):15} ({self.movelist[i].pp}/{self.movelist[i].pptot})", end='\t')
+            elif i == 1:
+                print(f"{i+2}. {str(self.movelist[i+1]):15} ({self.movelist[i+1].pp}/{self.movelist[i+1].pptot})")
+            elif i == 2:
+                print(f"{i}. {str(self.movelist[i-1]):15} ({self.movelist[i-1].pp}/{self.movelist[i-1].pptot})", end='\t')
+            elif i == 3:
+                print(f"{i+1}. {str(self.movelist[i]):15} ({self.movelist[i].pp}/{self.movelist[i].pptot})")
 
     def doMove(self, foeobj, movenum):
         ''' Retrieves foe's obj and move chosen,
@@ -163,7 +172,7 @@ class MyPokemon(UniquePoke):
                 print(f"Your {self.pokeobj.name} used {move} on the foe's pokemon! {move.category}")
         else:
             print(f"Your {self.pokeobj.name} used {move} on the foe's pokemon! {move.category}")
-        # move.pp -= 1
+        move.pp -= 1
         # STAB calculation
         if move.movetype == self.pokeobj.poketype1 or move.movetype == self.pokeobj.poketype1:
             stab = 1.5
@@ -296,17 +305,27 @@ class MyPokemon(UniquePoke):
             self.xp %= self.xplimit
             print(f"\nYour pokemon grew to lvl {self.lvl}!")
             for k,v in self.pokeobj.movedict.items():
+                # Learning a new move and forget the old one
                 if k == self.lvl and "" not in self.movelist and v not in self.movelist:
                     sleep(0.5)
-                    print(f"Your pokemon wants to learn {v}, which move would you want to forget?")
-                    sleep(0.3)
-                    self.showMoves()
-                    update_move = ""
-                    while update_move not in [str(num+1) for num in range(len(self.movelist))]:
-                        update_move = input(">>")
-                    forget = self.movelist[int(update_move)-1]
-                    self.movelist[int(update_move)-1] = v
-                    print(f"Your pokemon forget {forget}, and now learn {v}")
+                    valid = False
+                    while not valid:
+                        isforget = input(f"Your pokemon wants to learn {v}, do you want to forget a move? [Y/n] ").lower()
+                        if isforget == 'y':
+                            sleep(0.3)
+                            print("Which move would you want to forget?")
+                            self.showMoves()
+                            update_move = ""
+                            while update_move not in [str(num+1) for num in range(len(self.movelist))]:
+                                update_move = input(">>")
+                            forget_move = self.movelist[int(update_move)-1]
+                            self.movelist[int(update_move)-1] = v
+                            print(f"Your pokemon forget {forget_move}, and now learn {v}")
+                            valid = True
+                        elif isforget == 'n':
+                            print("Your pokemon did not learn {v}.")
+                            valid = True
+                # Learning a new move instantly
                 elif k == self.lvl and "" in self.movelist and v not in self.movelist:
                     self.movelist[self.movelist.index("")] = v
                     print(f"Your pokemon now learn {v}!")

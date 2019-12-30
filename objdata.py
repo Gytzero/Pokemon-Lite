@@ -58,7 +58,7 @@ Shock_Wave = Moves("Shock Wave", Electric, 60, 100, 20, Spc)
 Leer = Moves("Leer", Empty, 0, 100, 30, Stt)
 Tail_Whip = Moves("Tail Whip", Empty, 0, 100, 30, Stt)
 Growl = Moves("Growl", Empty, 0, 100, 40, Stt)
-Swords_Dance = Moves("Swords Dance", Empty, 0, 100, 20, Stt)
+Swords_Dance = Moves("Swords Dance", Empty, 0, 100, 5, Stt)
 
 # Available pokemon initialization
 Pikachu = UniquePoke("Pikachu", Electric, Steel, [35, 55, 40, 50, 50, 90], movedict={2:Metal_Claw, 4:Slam, 7:Swords_Dance, 12:Thunder_Shock, 14:Shock_Wave})

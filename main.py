@@ -43,9 +43,6 @@ def askQuit():
             valid = True
             exit = True
             return valid, exit
-        # Undesired input handling
-        else:
-            pass
 
 
 def main():
@@ -93,17 +90,26 @@ def main():
         while my_pokemon.getHp() > 0 and wild_pokemon.getHp() > 0:
             print()
             my_pokemon.showMoves()
+            print()
 
             # Asking for user's intended move
             count = countMoves(my_pokemon)
             choose_move = ''
+            print("Which move would you use?")
             while choose_move not in [str(num+1) for num in range(count)]:
-                print("Which move would you use?")
                 choose_move = input("> ")
-                # move = my_pokemon.movelist[int(choose_move)-1]
-                # if move.pp == 0:
-                #     print("This move's PP is 0")
-                #     continue                
+                try:
+                    move = my_pokemon.movelist[int(choose_move)-1]
+                    if move.pp == 0:
+                        print("This move has no PP left")
+                        choose_move = ''
+                        continue
+                except AttributeError:
+                    pass            
+                except ValueError:
+                    pass
+                except IndexError:
+                    pass
             sleep(0.5)
             print()
 
