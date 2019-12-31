@@ -56,7 +56,7 @@ def main():
     # My pokemon starting initialization
     lvl_now = 11
     xp_now = 0
-    my_pokemon = MyPokemon(Pikachu, lvl=lvl_now, xp=xp_now)
+    my_pokemon = MyPokemon(random.choice(UniquePoke.pokemonlist), lvl=lvl_now, xp=xp_now)
     
     # Battle scene
     exit = False
@@ -74,7 +74,16 @@ def main():
         # Testing stat changing move
         Leer.addEffect(wild_pokemon, my_pokemon, 'sdef', -1)
         Growl.addEffect(wild_pokemon, my_pokemon, 'satk', -1)
+        Tail_Whip.addEffect(wild_pokemon, my_pokemon, 'sdef', -1)
+        Howl.addEffect(my_pokemon, wild_pokemon, 'satk', 1)
+        Screech.addEffect(wild_pokemon, my_pokemon, 'sdef', -2)
         Swords_Dance.addEffect(my_pokemon, wild_pokemon, 'satk', 2)
+        Sand_Attack.addEffect(wild_pokemon, my_pokemon, 'sspdef', -1)   #not implemented
+        Odor_Sleuth.addEffect(wild_pokemon, my_pokemon, 'sdef', -1)
+        Focus_Energy.addEffect(my_pokemon, wild_pokemon, 'satk', 1)
+        Bide.addEffect(my_pokemon, wild_pokemon, 'satk', 1)
+        Thunder_Wave.addEffect(wild_pokemon, my_pokemon, 'sspdef', -1)
+        String_Shot.addEffect(wild_pokemon, my_pokemon, 'sspe', -1)
 
         # Print current pokemon state
         print(f"{my_pokemon} ({my_pokemon.nature})")

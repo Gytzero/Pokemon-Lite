@@ -99,6 +99,7 @@ class UniquePoke():
         self.bspdef = statlist[4]
         self.bspe = statlist[5]
         self.movedict = movedict
+        self.shiny = random.randint(0, 4096)
 
     def __str__(self):
         return self.name
@@ -149,7 +150,6 @@ class MyPokemon(UniquePoke):
         ''' To inform current move and PP available '''
         count = countMoves(self)
         # print("Moves available:\n 1.{0:20} 3.{1}\n 2.{2:20} 4.{3}".format(str(self.move1), str(self.move3), str(self.move2), str(self.move4)))
-        # print(self.move1.pp, self.move2.pp, self.move3.pp, self.move4.pp)
         for i in range(count):
             if i == 0:
                 print(f"{i+1}. {str(self.movelist[i]):15} ({self.movelist[i].pp}/{self.movelist[i].pptot})", end='\t')
@@ -423,7 +423,10 @@ class WildPokemon(UniquePoke):
         print(f"*Foe's {self.pokeobj.name} HP is now {self.shp}.")
 
     def __str__(self):
-        return f"A wild lvl {self.lvl} {self.pokeobj.name} appeared!"
+        if self.pokeobj.shiny:
+            return f"A wild lvl {self.lvl} {self.pokeobj.name} appeared!"
+        else:
+            return f"A wild lvl {self.lvl} SHINY {self.pokeobj.name} appeared!!!"
 
     def __repr__(self):
         return self.name
